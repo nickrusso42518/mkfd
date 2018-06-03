@@ -1,0 +1,88 @@
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname {{ entity.id }}_RTR
+!
+!
+enable password ansible
+!
+aaa new-model
+!
+aaa authentication login default group tacacs+ local
+aaa authorization exec default group tacacs+ local 
+aaa session-id common
+!
+ip cef
+!
+!
+username ansible privilege 15 password ansible
+!
+!
+interface GigabitEthernet0/0
+ description LAST MILE TO MPLS L3VPN PE
+ ip address {{ ce_ip }} 255.255.255.254
+ no shutdown
+!
+interface GigabitEthernet0/1
+ description LINK TO SWITCH
+ no ip address
+ no shutdown
+!
+interface GigabitEthernet0/1.10
+ description DATA VLAN
+ encapsulation dot1Q 10
+ ip address {{ data_gway }} 255.255.255.192
+!
+interface GigabitEthernet0/1.20
+ description VOICE VLAN
+ encapsulation dot1Q 20
+ ip address {{ voice_gway }} 255.255.255.192
+!
+router bgp 65001
+ bgp router-id {{ ce_ip }}
+ no bgp default ipv4-unicast
+ bgp log-neighbor-changes
+ neighbor {{ pe_ip }} remote-as 65002
+ neighbor {{ pe_ip }} description MPLS L3VPN PE
+ !        
+ address-family ipv4
+  neighbor {{ pe_ip }} activate
+  no auto-summary
+  no synchronization
+  network {{ data_net }} mask 255.255.255.192
+  network {{ voice_net }} mask 255.255.255.192
+ exit-address-family
+!
+no ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+logging origin-id hostname
+logging host {{ corp_server.syslog }}
+!
+snmp-server community public RO
+snmp-server enable traps envmon
+snmp-server enable traps memory bufferpeak
+snmp-server enable traps cpu threshold
+snmp-server host {{ corp_server.snmp }} version 2c public 
+!
+!
+tacacs-server host {{ corp_server.tacacs }} key SecretKey123
+tacacs-server timeout 1
+!
+control-plane
+!
+!
+!
+line con 0
+line aux 0
+line vty 0 4
+!
+{% for n in corp_server.ntp %}
+ntp server {{ n }}
+{% endfor %}
+!
+end

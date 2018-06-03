@@ -1,0 +1,40 @@
+---
+- name: "PCHK >> Ensure PE-CE subnet is a valid /31"
+  assert:
+    that:
+      - "corp_server.syslog is defined"
+      - "corp_server.syslog | ipv4 == corp_server.syslog"
+      - "corp_server.snmp is defined"
+      - "corp_server.snmp | ipv4 == corp_server.snmp"
+      - "corp_server.tacacs is defined"
+      - "corp_server.tacacs | ipv4 == corp_server.tacacs"
+      - "corp_server.ntp is defined"
+      - "corp_server.ntp | length >= 2"
+    msg: |-
+     Invalid corporate server inputs --
+     syslog {{ corp_server.syslog | default ('nothing') }}
+     snmp {{ corp_server.snmp | default ('nothing') }}
+     tacacs {{ corp_server.tacacs | default ('nothing') }}
+
+- name: "PCHK >> Ensure PE-CE subnet is a valid /31"
+  assert:
+    that:
+      - "entity.pece_net is defined"
+      - "entity.pece_net | ipv4 == entity.pece_net"
+      - "entity.pece_net | ipaddr('prefix') == 31"
+      - "entity.pece_net is defined"
+      - "entity.pece_net | ipv4 == entity.pece_net"
+      - "entity.pece_net | ipaddr('prefix') == 31"
+      - "entity.num_swports is defined"
+      - "entity.num_swports | int >= 12"
+      - "entity.num_swports | int <= 48"
+    msg: |-
+      Invalid input somewhere within this entity --
+      pece_net {{ entity.pece_net | default ('nothing') }}
+      site_net {{ entity.site_net | default ('nothing') }}
+      num_swports {{ entity.num_swports | default ('nothing') }}
+  with_items: "{{ entity_list }}"
+  loop_control:
+    loop_var: entity
+    label: "id:{{ entity.id }}"
+...

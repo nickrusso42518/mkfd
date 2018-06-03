@@ -1,9 +1,18 @@
 ---
+corp_server:
+  tacacs: "203.0.113.11"
+  snmp: "203.0.113.12"
+  syslog: "203.0.113.13"
+  ntp:
+    - "203.0.113.14"
+    - "203.0.113.15"
 entity_list:
-  - id: "test1"
-    ipaddr: "192.0.1.1"
-    prefixlen: 21
-  - id: "test2"
-    ipaddr: "192.0.1.2"
-    prefixlen: 22
+  - id: "BRANCH1"
+    pece_net: "198.51.100.0/31"
+    site_net: "192.0.2.0/25"
+    num_swports: 24
+  - id: "BRANCH2"
+    pece_net: "198.51.100.2/31"
+    site_net: "192.0.2.128/25"
+    num_swports: 48
 ...

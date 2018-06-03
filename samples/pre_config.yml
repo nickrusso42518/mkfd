@@ -1,0 +1,21 @@
+---
+# It can be useful to store the word 'entity' as the first item
+# in the with_together loop during config and documentation
+# generation.
+- name: "PCON >> Store iterator as 'entity' var for reference"
+  set_fact:
+    entity: "{{ item[0] }}"
+
+# Computing these variables in a centralized file, rather than in the
+# individual templates, allows them to be used in any template without the
+# need for copy/paste.
+- name: "PCON >> Compute IP addresses ahead of time"
+  set_fact:
+    pe_ip: "{{ entity.pece_net | ipaddr('first_usable') | ipaddr('address') }}"
+    ce_ip: "{{ entity.pece_net | ipaddr('last_usable') | ipaddr('address') }}"
+    data_gway: "{{ entity.site_net | ipaddr('1') | ipaddr('address') }}"
+    voice_gway: "{{ entity.site_net | ipaddr('65') | ipaddr('address') }}"
+    sw_ip: "{{ entity.site_net | ipaddr('2') | ipaddr('address') }}"
+    data_net: "{{ entity.site_net | ipaddr('network') }}"
+    voice_net: "{{ entity.site_net | ipaddr('64') | ipaddr('address') }}"
+...
