@@ -1,0 +1,91 @@
+---
+# Collect the date/time group if it has not been done already.
+# In some cases, this role may be included in a playbook that has
+# already defined the 'DTG' variable, so don't overwrite it.
+- name: "BLOCK >> Collect date/time if not already defined"
+  block:
+    - name: "LOG >> Get ansible date/time facts"
+      setup:
+        filter: "ansible_date_time"
+        gather_subset: "!all"
+
+    - name: "LOG >> Store DTG as fact"
+      set_fact:
+        DTG: "{{ ansible_date_time.iso8601_basic_short }}"
+  when: "DTG is not defined"
+
+# Initial error checking performed on all entities in the list
+# Because the 'id' is used in the naming of directories and files,
+# it needs to be well-formed.
+- name: "SYS >> Ensure all entities have a valid 'id' field"
+  assert:
+    that:
+      - "item.1.id is defined"  # The 'id' key must exist
+      - "item.1.id"  # Value cannot be null or empty string
+      - "item.1.id | lower != 'undefined'"  # Value cannot be 'undefined'
+    msg: "Entity at index {{ item.0 }} has invalid 'id' field"
+  with_indexed_items: "{{ entity_list }}"
+  loop_control:
+    label: "entity {{ item.0 + 1 }}/{{ entity_list | length }}"
+
+# There cannot be duplicates because then files and directories
+# would overwrite one another, causing confusion.
+# The length of the original list must equal the length
+# the same list after removing any duplicate items
+- name: "SYS >> Ensure there are no duplicate entity ids"
+  assert:
+    that: >-
+        entity_list | length ==
+        entity_list | map(attribute='id') | list | unique | length
+    msg: "Duplicate 'id' keys exist within entity_list"
+
+# Try to find the playbook file 'pre_check.yml' at the top level
+# of the playbook hierarchy. This file contains additional, per-entity
+# error checking that is user-defined and playbook-specific.
+- name: "SYS >> See if playbook has defined 'pre_check.yml'"
+  stat:
+    get_attributes: false
+    get_md5: false
+    get_mime: false
+    path: "{{ playbook_dir }}/pre_check.yml"
+  register: PB_PRE_CHECK
+
+# Only include the file if the task above succeeding in finding it.
+# If the file was not found, then the user did not define it, and so
+# the following task is skipped.
+- name: "SYS >> Include 'pre_check.yml' if file exists"
+  include_tasks: "{{ playbook_dir }}/pre_check.yml"
+  when: "PB_PRE_CHECK.stat.exists"
+
+# Common variables used in the role are defined early for reference
+- name: "SYS >> Store relevant directories as facts"
+  set_fact:
+    PBCT: "{{ playbook_dir }}/config_templates/"  # playbook config templates
+    PBIT: "{{ playbook_dir }}/infra_templates/"  # playbook infra templates
+    PBDT: "{{ playbook_dir }}/doc_inputs/"  # playbook doc (latex) templates
+    PBF: "{{ playbook_dir }}/files/"  # playbook files (outputs)
+    PBFI: "{{ playbook_dir }}/files/infra_{{ DTG }}/"  # per-entity infra files
+    PBA: "{{ playbook_dir }}/archives/"  # playbook archives (outputs)
+    PBHV: "{{ playbook_dir }}/host_vars/"  # playbook host variables files
+
+# Most of the directories above always exist. This task ensures
+# the necessary ones exist before continuing.
+- name: "SYS >> Ensure playbook directories exist"
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ PBCT }}"
+    - "{{ PBIT }}"
+    - "{{ PBDT }}"
+    - "{{ PBF }}"
+    - "{{ PBA }}"
+
+# Capturing the current shell user can be useful for documentation
+# purposes. However, it is non-critical, so if this fails, ignore it.
+# The role defaults specify the string of 'ansible' as a backup.
+- name: "SYS >> Store current user; if it fails, use 'ansible'"
+  set_fact:
+    current_user: "{{ lookup('env', 'USER') }}"
+  ignore_errors: true
+...

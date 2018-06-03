@@ -1,0 +1,4 @@
+samples/files/*
+samples/archives/*
+tests/files/*
+tests/archives/*

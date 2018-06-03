@@ -1,0 +1,10 @@
+---
+# Iterate over the playbook directories and remove them. This is
+# used for cleanup after a test case fails, or after the entire
+# test playbook completes.
+- name: "SYS >> Remove all templater-managed directories"
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items: "{{ PB_DIRS }}"
+...

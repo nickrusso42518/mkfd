@@ -1,0 +1,15 @@
+---
+all:
+  children:
+    control:  # Control machines
+      hosts:
+        localhost:
+      vars:
+        entity_list:
+          - id: "test1"
+            ipaddr: "192.0.1.1"
+            prefixlen: 21
+          - id: "test2"
+            ipaddr: "192.0.1.2"
+            prefixlen: 22
+...

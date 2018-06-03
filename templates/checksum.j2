@@ -1,0 +1,6 @@
+sha256sum,filename
+{% for item in PBF_CHECKSUMS.results %}
+{% if item.stat is defined %}
+{{ item.stat.checksum }},{{ item.stat.path | basename }}
+{% endif %}
+{% endfor %}

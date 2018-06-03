@@ -1,0 +1,14 @@
+---
+# It can be useful to store the word 'entity' as the first item
+# in the with_together loop during config and documentation
+# generation.
+- name: "Store iterator as 'entity' var for reference"
+  set_fact:
+    entity: "{{ item[0] }}"
+
+# Create a new variable called hostname and try to reference it
+# later within the template to ensure it was defined.
+- name: "Define hostname"
+  set_fact:
+    hostname: "{{ entity.id }}-hostname"
+...

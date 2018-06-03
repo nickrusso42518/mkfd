@@ -1,0 +1,249 @@
+---
+- name: "SYS >> Execute test playbook"
+  hosts: control
+  vars:
+    # Boolean flag to ensure the 'pre_check.yml' file is included.
+    PRE_CHECK: false
+    # Create the playbook directories used within the role.
+    PB_DIRS:
+      - "{{ playbook_dir }}/config_templates/"
+      - "{{ playbook_dir }}/infra_templates/"
+      - "{{ playbook_dir }}/doc_inputs/"
+      - "{{ playbook_dir }}/files/"
+      - "{{ playbook_dir }}/archives/"
+
+  tasks:
+    # Begin by ensuring the playbook directories are deleted, since
+    # the role is responsible for creating them. The first test must
+    # create the empty directory structure.
+    - include_tasks: "tasks/rm_dirs.yml"
+
+    # Running the mkfd with no inputs should build the directory
+    # structure and gracefully exit.
+    - name: "SYS >> Test 1: Run empty mkfd to build dirs, no outputs"
+      block:
+
+        # Include the role for the first time
+        - include_role:
+            name: mkfd
+
+        # Assert that the right number of files exists after this
+        # test case. Because no inputs were provided, there should be not
+        # output files.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 0
+            num_archives: 0
+            num_checksum: 0
+            num_doc: 0
+
+        # Ensure the 'pre_check.yml' file was properly included by
+        # asserting the flag which should have been set in the file.
+        - name: "SYS >> One time assert; ensure pre_check.yml worked"
+          assert:
+            that: "PRE_CHECK"
+            msg: "pre_check.yml was not properly included, flag was false"
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 1 failed"
+
+    # Add a single text template into the config_templates/ folder to
+    # ensure the role can template files correctly.
+    - name: "SYS >> Test 2: Run mkfd with dummy template, no archive"
+      block:
+
+        # Write an in-line template and save to disk. It invokes a
+        # handful of variables, some of which were defined in the
+        # custom inventory, others were defined in pre_config.yml file.
+        - name: "SYS >> Create a basic template using inventory vars"
+          copy:
+            content: !unsafe |
+              hostname {{ hostname }}
+              ip address {{ entity.ipaddr }}/{{ entity.prefixlen }}
+            dest: "{{ playbook_dir }}/config_templates/BASIC1.j2"
+
+        # Invoke the role.
+        - include_role:
+            name: mkfd
+
+        # Assert that there are 2 output files total, one per entity.
+        # There is 1 master checksum file, and nothing else.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 2
+            num_archives: 0
+            num_checksum: 1
+            num_checksum_lines: 3
+            num_doc: 0
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 2 failed"
+
+    # Similar to the previous test, except add another template.
+    - name: "SYS >> Test 3: Run mkfd with 2 dummy templates, no archive"
+      block:
+
+        # Write an in-line template and save to disk. It invokes a
+        # handful of variables, some of which were defined in the
+        # custom inventory, others were defined in pre_config.yml file.
+        - name: "SYS >> Create another basic template using inventory vars"
+          copy:
+            content: !unsafe |
+              {% set entity = item[0] -%}
+              ip address is    {{ entity.ipaddr }}
+              prefix length is {{ entity.prefixlen }}
+            dest: "{{ playbook_dir }}/config_templates/BASIC2.j2"
+
+        # Invoke the role.
+        - include_role:
+            name: mkfd
+
+        # Just like the previous test, except now there are twice as
+        # many config files (2 templates per 2 entities), 1 checksum,
+        # and nothing else.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 4
+            num_archives: 0
+            num_checksum: 1
+            num_checksum_lines: 5
+            num_doc: 0
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 3 failed"
+
+    # Repeat the previous test with archiving enabled.
+    - name: "SYS >> Test 4: Run mkfd with 2 dummy templates, with archive"
+      block:
+
+        # Invoke the role and override the role default 'make_zip' variable
+        # to true so that the archive process starts.
+        - include_role:
+            name: mkfd
+          vars:
+            make_zip: true
+
+        # This time, the only output should be a single archive, and nothing
+        # else should be left over.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 0
+            num_archives: 1
+            num_checksum: 0
+            num_doc: 0
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 4 failed"
+
+    # Repeat the previous test, except disable archiving while enabling
+    # documentation generation.
+    - name: "SYS >> Test 5: Run mkfd with 2 dummy templates, with doc"
+      block:
+
+        # Write a jinja2-style LaTeX template in-line. It uses variables
+        # from the inventory and from pre_config.yml
+        - name: "SYS >> Create a basic LaTeX template using inventory vars"
+          copy:
+            content: !unsafe |
+              Bb set entity = item[0] -bB
+              \documentclass{article}
+              % DTG: Vv DTG vV
+              \begin{document}
+              hostname is      Vv hostname vV
+              ip address is    Vv entity.ipaddr vV
+              prefix length is Vv entity.prefixlen vV
+              \end{document}
+            dest: "{{ playbook_dir }}/doc_inputs/DOC.j2"
+
+        # Invoke the role and override the role default 'doc_name' to
+        # specify the basename (minus file extension) of the template
+        # created in the previous task.
+        - include_role:
+            name: mkfd
+          vars:
+            doc_name: "DOC"
+
+        # The original 2 templates per 2 entities still exists, except now
+        # there is 1 document per 2 entities for a total of 2 documents.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 4
+            num_archives: 0
+            num_checksum: 1
+            num_checksum_lines: 7
+            num_doc: 2
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 5 failed"
+
+    # Re-run the previous test with archiving enabled, effectively mirroring
+    # the most common operation of this role.
+    - name: "SYS >> Test 6: Run mkfd with 2 dummy templates, with doc/arch"
+      block:
+
+        # Invoke the role and override both the 'doc_name' and 'make_zip'
+        # role defaults to enable documentation and archival.
+        - include_role:
+            name: mkfd
+          vars:
+            doc_name: "DOC"
+            make_zip: true
+
+        # Since archival is enabled, only 1 archive should exist.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 0
+            num_archives: 1
+            num_checksum: 0
+            num_doc: 0
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 6 failed"
+
+    # Test the system when checksumming is disabled, a rare case, but
+    # must be validation.
+    - name: "SYS >> Test 7: Run mkfd with 2 dummy templates, no checksum"
+      block:
+
+        # Invoke the role with 'skip_sha256' role default overriden to true.
+        - include_role:
+            name: mkfd
+          vars:
+            skip_sha256: true
+
+        # There are still 2 templates per 2 entities (4 config files), but
+        # the checksum file should be absent.
+        - include_tasks: "tasks/count_files.yml"
+          vars:
+            num_files: 4
+            num_archives: 0
+            num_checksum: 0
+            num_doc: 0
+
+      rescue:
+        # If any step fails, clean up the directories, then fail.
+        - include_tasks: "tasks/rm_dirs.yml"
+        - fail:
+            msg: "Test 7 failed"
+
+    # Final cleanup
+    - include_tasks: "tasks/rm_dirs.yml"
+...

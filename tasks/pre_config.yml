@@ -1,0 +1,19 @@
+---
+# Search for the file 'pre_config.yml' within the playbook directory.
+# This optional file is iteratively included in the "config.yml"
+# and "make_doc.yml" files to pull in common variables within an
+# entity. The file is optional.
+- name: "SYS >> See if playbook has defined 'pre_config.yml'"
+  stat:
+    get_attributes: false
+    get_md5: false
+    get_mime: false
+    path: "{{ playbook_dir }}/pre_config.yml"
+  register: PB_PRE_CONFIG
+
+# If the 'pre_config.yml' file was found in the task above, it is
+# included for processing.
+- name: "SYS >> Include 'pre_config.yml' if file exists"
+  include_tasks: "{{ playbook_dir }}/pre_config.yml"
+  when: "PB_PRE_CONFIG.stat.exists"
+...

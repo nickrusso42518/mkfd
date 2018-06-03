@@ -1,0 +1,40 @@
+---
+# Invoke "pre_config.yml" to dynamically include the "pre_config.yml"
+# file if it is defined
+- include_tasks: "pre_config.yml"
+
+# This is the heart of the role. Since the "make_config.yml" file
+# that we are in right now is already being invoked iteratively, another
+# level of iteration is required to process each playbook-specific
+# template. The loop variable is renamed to "templat" since "item" is already
+# in use by the parent loop, shown below again:
+#   with_together:
+#     - "{{ entity_list }}"  -->  referenced as item.0
+#     - "{{ CONFIG_DIRS }}"  -->  referenced as item.1
+#
+# The destination file for text documents run through the 'template'
+# module is a concatenation of the playbook file path and a detailed file name:
+#   "/etc/ansible/(playbook)/files/(id)_(dtg)/(id)_(template)_(dtg).txt"
+#
+# The results of the template module (most importantly, the "path" key) is
+# stored in PBF_LIST_CONFIG for future assembly and processing.
+- name: "SYS >> Make config from playbook templates"
+  template:
+    src: "{{ templat.path }}"
+    dest: >-
+      {{ item.1 }}/{{ item.0.id }}_{{
+      (templat.path | basename | splitext)[0] }}_{{ DTG }}.txt
+    mode: "{{ file_mode }}"
+  register: PBF_LIST_CONFIG
+  with_items: "{{ PBCT_LIST.files }}"
+  loop_control:
+    loop_var: "templat"
+    label: "template:{{ templat.path }}"
+
+# PBF_LIST is a list that contains the results of all "template" module
+# runs. After all templates are created, this list can be used for
+# generating checksums or other common actions to all text files.
+- name: "SYS >> Concat config PBF list to master list"
+  set_fact:
+    PBF_LIST: "{{ PBF_LIST + PBF_LIST_CONFIG.results }}"
+...

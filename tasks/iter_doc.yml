@@ -1,0 +1,17 @@
+---
+# Iteratively invoke "make_doc.yml" which handles all of the core
+# logic for creating PDF documentation. It follows a two stage process:
+#   1. Convert Jinja2 (.j2) to LaTeX (.tex)
+#   2. Convert LaTeX (.tex) to PDF (.pdf)
+#
+# The loop walks over two parallel lists, described below:
+#   - The list of entities whereby each component dict is seen as item.0
+#   - The list of config directories; each component string is seen as item.1
+- name: "SYS >> Convert j2 to LaTeX to PDF for '{{ doc_name }}'"
+  include_tasks: "make_doc.yml"
+  with_together:
+    - "{{ entity_list }}"
+    - "{{ CONFIG_DIRS }}"
+  loop_control:
+    label: "id:{{ item.0.id }}  dir:{{ item.1 }}"
+...

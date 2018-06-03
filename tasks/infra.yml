@@ -1,0 +1,48 @@
+---
+# Search the PBIT path "/etc/ansible/(playbook)/infra_templates/"
+# for specific Jinja2 files, typically ending in .j2 or .jinja2 as
+# defined in the role defaults. Store the resulting list for
+# future processing later in this task file.
+- name: "SYS >> Get playbook infra templates"
+  find:
+    path: "{{ PBIT }}"
+    patterns: "{{ j2_patterns }}"
+  register: PBIT_LIST
+
+# Toggle debugging to print the result list created above. This can be invoked
+# by using the -v option at the command line when the playbook runs.
+- name: "DEBUG >> Print PBIT_LIST output"
+  debug:
+    var: PBIT_LIST
+    verbosity: "{{ debug_level }}"
+
+# Dynamically create a directory for infrastructure updates only if at
+# least one infrastructure template was defined. Creating an empty directory
+# clutters the output otherwise.
+- name: "SYS >> Ensure infrastructure directory exists"
+  file:
+    path: "{{ PBFI }}"
+    state: directory
+  when: "PBIT_LIST.files | length > 0"
+
+# Iterate over all infrastructure templates discovered in the previous task.
+# The format of the infrastructure text file is as follows:
+#   "/etc/ansible/(playbook)/files/infra_(dtg)/(template)_(dtg).txt"
+- name: "SYS >> Make infra from playbook templates"
+  template:
+    src: "{{ item.path }}"
+    dest: >-
+      {{ PBFI }}{{ (item.path | basename | splitext)[0] }}_{{ DTG }}.txt
+    mode: "{{ file_mode }}"
+  register: PBF_LIST_INFRA
+  with_items: "{{ PBIT_LIST.files }}"
+  loop_control:
+    label: "template:{{ item.path }}"
+
+# Toggle debugging to print the result list created above. This can be invoked
+# by using the -v option at the command line when the playbook runs.
+- name: "DEBUG >> Print PBF_LIST_INFRA output"
+  debug:
+    var: PBF_LIST_INFRA
+    verbosity: "{{ debug_level }}"
+...

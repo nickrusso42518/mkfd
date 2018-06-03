@@ -1,0 +1,21 @@
+---
+# This pre_check.yml file is included right after the entities are
+# checked for unique 'id' keys. Ensure that the IP addresses are
+# valid and have a mask of /32 (single host IP). Ensure the
+# prefixlen variable is a valid integer.
+- name: "SYS >> Ensure entity has valid IP addr and prefix length"
+  assert:
+    that:
+      - "item.ipaddr | ipv4 == item.ipaddr"
+      - "item.ipaddr | ipaddr('prefix') == 32"
+      - "item.prefixlen | int == item.prefixlen"
+  with_items: "{{ entity_list }}"
+  loop_control:
+    label: "checking:{{ item.id }}"
+
+# Set a flag to ensure that pre_check ran successful, which can
+# be asserted back in the main file.
+- name: "SYS >> Set PRE_CHECK to true to indicate successful inclusion"
+  set_fact:
+    PRE_CHECK: true
+...

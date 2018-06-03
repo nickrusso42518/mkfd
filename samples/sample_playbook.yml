@@ -1,0 +1,7 @@
+---
+- name: "Sample playbook using the mkfd role"
+  hosts: localhost
+  tasks:
+    - include_role:
+        name: mkfd
+...

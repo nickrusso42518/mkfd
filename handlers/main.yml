@@ -1,0 +1,46 @@
+---
+# The 'archive' module can delete files that it includes, but not
+# directories. This explicit task, iterates over the entity list
+# and deletes all entity-specific file directories. The directories
+# being removed have the following format:
+#   "/etc/ansible/(playbook)/files/(id)_(dtg)"
+- name: "SYS >> Clean up empty config directories"
+  listen: "archive_handler"
+  file:
+    path: "{{ PBF }}{{ item.id }}_{{ DTG }}"
+    state: absent
+  with_items: "{{ entity_list }}"
+  loop_control:
+    label: "{{ PBF }}{{ item.id }}_{{ DTG }}"
+
+# The infrastructure directory only exists once per templater run,
+# not per entity, so there is only one to remove.
+#   "/etc/ansible/(playbook)/files/infra_(dtg)"
+- name: "SYS >> Clean up empty infra directory"
+  listen: "archive_handler"
+  file:
+    path: "{{ PBFI }}"
+    state: absent
+
+# This role does not assume the user wants to copy the ZIP file from the
+# control machine. Assuming this is desired, this task provides a copy/paste
+# command for users to SCP the file to a WANMGR.
+- name: "SYS >> Securely copy the archive ZIP to a WANMGR"
+  listen: "archive_handler"
+  debug:
+    msg: "scp {{ PBA }}{{ zip_name }}_{{ DTG }}.zip scp@WANMGR_0365:/facts/"
+
+# The final cleanup task is only relevant for developer testing, such
+# as CI pipeline or manual regression testing. After the archive is build
+# and all supporting files/directories are deleted, only the archive file
+# remains. This task deletes the archive file as well, effectively making
+# the entire templating process produce nothing. It can be used to ensure
+# a specific playbook runs without exploding (a smoke test). The boolean
+# 'remove_zip' is false in the role defaults.
+- name: "TEST >> Remove the archive, since this is a test run"
+  listen: "archive_handler"
+  file:
+    path: "{{ PBA }}{{ zip_name }}_{{ DTG }}.zip"
+    state: absent
+  when: "remove_zip"
+...

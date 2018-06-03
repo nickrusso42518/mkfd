@@ -1,0 +1,126 @@
+---
+# Invoke "pre_config.yml" to dynamically include the "pre_config.yml"
+# file if it is defined. TODO: Explore not including this twice, but
+# probably includes a new list of dicts to carry everywhere.
+- include_tasks: "pre_config.yml"
+
+# Much like the config files, the PDF document needs a name as well.
+# The format is similar except includes the 'doc_name', which is a selector
+# for a specific LaTeX document to use. Different playbooks may have different
+# LaTeX templates which can be toggled between playbook runs.
+#   "/etc/ansible/(playbook)/files/(id)_(dtg)/(id)_(doc_name)_(dtg)"
+- name: "SYS >> Determine current PDF document name"
+  set_fact:
+    PDF_DOC: "{{ '{0}/{1}_{2}_{3}'.format(item.1, item.0.id, doc_name, DTG) }}"
+
+# Toggle debugging to print the string created above. This can be invoked
+# by using the -v option at the command line when the playbook runs.
+- name: "DEBUG >> Print current PDF_DOC"
+  debug:
+    var: PDF_DOC
+    verbosity: "{{ debug_level }}"
+
+# Perform j2 to LaTeX conversion on the doc template. This process is not
+# iterative by itself since only one PDF can be generated per entity. Custom
+# block and variable strings are defined because curley braces {} are used
+# by LaTeX and could cause problems for Jinja2 trying to template the file.
+#   Example blockusage:     Bb set x = 17 -bB
+#   Example variable usage: Hello, I set x to Vv x vV
+- name: "SYS >> Make docs from j2-templated LaTeX '{{ doc_name }}'"
+  template:
+    src: "{{ playbook_dir }}/doc_inputs/{{ doc_name }}.j2"
+    dest: "{{ PDF_DOC }}.tex"
+    mode: "{{ file_mode }}"
+    block_start_string: "Bb"
+    block_end_string: "bB"
+    variable_start_string: "Vv"
+    variable_end_string: "vV"
+  register: PBF_TEX
+
+# Toggle debugging to print the result from the task above. This can be invoked
+# by using the -v option at the command line when the playbook runs. This
+# result is useful to see the exact .tex file path as it is output from the
+# first phase (.j2 to .tex) in the documentation building process.
+- name: "DEBUG >> Print intermediate PBF_TEX"
+  debug:
+    var: PBF_TEX
+    verbosity: "{{ debug_level }}"
+
+# The second phase includes running the .tex file through the "pdflatex" shell
+# command multiple times. Due to cross-references that may exist in the
+# documentation, such as table of contents, list of figures, list of tables,
+# etc., LaTeX creates a temporary .aux file to hold inter-execution data
+# rather than store it in memory. The output file is stored on the proper
+# config directory and the file's name resembles that of the specified
+# template name.
+#
+# The loop variable is renamed to "pass" since "item" is already
+# in use by the parent loop, shown below again:
+#   with_together:
+#     - "{{ entity_list }}"  -->  referenced as item.0
+#     - "{{ CONFIG_DIRS }}"  -->  referenced as item.1
+- name: "SYS >> Convert LaTeX to PDF for '{{ item.0.id }}'"
+  command: >-
+    pdflatex -jobname {{ PDF_DOC }}
+    -output-format pdf -halt-on-error --interaction=batchmode
+    -output-directory={{ item.1 }} {{ PBF_TEX.dest }}
+  with_items:
+    - 1
+    - 2
+    - 3
+  loop_control:
+    loop_var: pass
+    label: "pass:{{ pass }}"
+
+# The .tex source file is not something users need to see, and it is typically
+# removed as "keep_tex" is false by default. For troubleshooting, developers
+# can set "keep_tex" to true which retains the .tex file after compilation.
+- name: "SYS >> Remove intermediate .tex file '{{ PBF_TEX.dest | basename }}'"
+  file:
+    path: "{{ PBF_TEX.dest }}"
+    state: absent
+  when: "not keep_tex"
+
+# LaTeX typsetting generates many other intermediate files which are
+# necessary for the cross-references discussed earlier. These files
+# are rarely needed and are unconditionally removed.
+- name: "SYS >> Remove typesetting files from job '{{ PDF_DOC | basename }}'"
+  file:
+    path: "{{ PDF_DOC }}.{{ ext }}"
+    state: absent
+  with_items:
+    - "aux"
+    - "lof"
+    - "log"
+    - "lot"
+    - "toc"
+    - "out"
+  loop_control:
+    loop_var: ext
+    label: "removing:{{ PDF_DOC }}.{{ ext }}"
+
+# Because the .pdf document was generated via the 'command' module
+# and not the 'template' module, the information returned is not in the
+# proper format for it to be seamlessly appending to the PBF_LIST for
+# future checksum processing. This task stores a fact containing a list
+# with one element. This element is a dictionary with one key known as
+# 'dest', which allows the .pdf results to look similar enough to the
+# config files going forward.
+- name: "SYS >> Store RESULT_DOC in 'results' form"
+  set_fact:
+    RESULT_DOC:
+      - dest: "{{ PDF_DOC }}.pdf"
+
+# Toggle debugging to print the result from the task above. This can be invoked
+# by using the -v option at the command line when the playbook runs.
+- name: "DEBUG >> Print temporary RESULT_DOC"
+  debug:
+    var: RESULT_DOC
+    verbosity: "{{ debug_level }}"
+
+# Add the .pdf file destination dict (defined above) to the playbook
+# files list for future processing.
+- name: "SYS >> Append document PBF list to master list"
+  set_fact:
+    PBF_LIST: "{{ PBF_LIST + RESULT_DOC }}"
+...

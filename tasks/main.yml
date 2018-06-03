@@ -1,0 +1,36 @@
+---
+# Perform setup tasks by including the "setup.yml" file.
+- name: "INCLUDE >> Initial verification, directory creation, and fact setting"
+  include_tasks: "setup.yml"
+
+# Perform config generation tasks by including the "setup.yml" file.
+# The high level logic includes a pair of nested for loops:
+#   for entity in entity_list:
+#     make directory
+#     for template in playbook_templates:
+#       make directory/config.txt
+- name: "INCLUDE >> For each entity, for each template, generate config files"
+  include_tasks: "config.yml"
+
+# Perform documentation creation using LaTeX (via pdflatex) by including
+# the "doc.yml" file. This only executes when "doc_name" is true.
+# Note that this variable should be a non-empty string representing the
+# basename of the LaTeX template.
+- name: "INCLUDE >> If 'doc_name' is set, generate documentation file"
+  include_tasks: "iter_doc.yml"
+  when: "doc_name is defined and doc_name"
+
+# Perform infrastructure snippet generation tasks by including the
+# "infra.yml" file. Note that the role task does not contain iteration
+# for each entity as it is expected that infrastructure templates include it.
+# This results in fewer infrastructure files, which makes sense for updating
+# infrastructure services.
+- name: "INCLUDE >> For each entity, populate set of infrastructure templates"
+  include_tasks: "infra.yml"
+
+# Perform cleanup on files and data by including the "cleanup.yml"
+# file. Optional handlers may perform additional cleanup if archives
+# are generated.
+- name: "INCLUDE >> Merge template lists, hash all files, and cleanup outputs"
+  include_tasks: "cleanup.yml"
+...
