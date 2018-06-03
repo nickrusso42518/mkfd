@@ -1,18 +1,14 @@
 ---
-# Collect the date/time group if it has not been done already.
-# In some cases, this role may be included in a playbook that has
-# already defined the 'DTG' variable, so don't overwrite it.
-- name: "BLOCK >> Collect date/time if not already defined"
-  block:
-    - name: "LOG >> Get ansible date/time facts"
-      setup:
-        filter: "ansible_date_time"
-        gather_subset: "!all"
+# Collect the date/time group to provide uniqueness to any files
+# generated when this role is included.
+- name: "LOG >> Get ansible date/time facts"
+  setup:
+    filter: "ansible_date_time"
+    gather_subset: "!all"
 
-    - name: "LOG >> Store DTG as fact"
-      set_fact:
-        DTG: "{{ ansible_date_time.iso8601_basic_short }}"
-  when: "DTG is not defined"
+- name: "LOG >> Store DTG as fact"
+  set_fact:
+    DTG: "{{ ansible_date_time.iso8601_basic_short }}"
 
 # Initial error checking performed on all entities in the list
 # Because the 'id' is used in the naming of directories and files,

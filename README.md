@@ -1,4 +1,4 @@
-# role : Make Configs and Docs (mkfd)
+# role : Make Files and Docs (mkfd)
 This role defines a general-purpose text templating engine. Plays that include
 this role will supply their own variables and templates in the proper
 locations. The role handles all the heavy-lifting and error checking
@@ -6,11 +6,24 @@ associated with correctly templating text files. The tool can also
 handle infrastructure updates, configuration integrity via hashing, and
 automated documentation generation using LaTeX.
 
+> Contact information:
+> Email:    njrusmc@gmail.com
+> Twitter:  @nickrusso42518
+
+  * [Supported platforms](#supported-platforms)
+  * [Hosts](#hosts)
+  * [LaTeX installation](#latex-installation)
+  * [Role defaults](#role-defaults)
+  * [Role variables](#role-variables)
+  * [Role handlers](#role-handlers)
+  * [Role templates](#role-templates)
+  * [Design guidance](#design-guidance)
+
+## Supported platforms
 This playbook does not log into any devices and only runs locally on the
 control machine. It is a perfect choice for risk-averse/conservative
 organizations that are not willing to automate their production devices yet.
 
-## Supported platforms
 Control machine information:
 ```
 $ cat /etc/redhat-release
@@ -33,7 +46,34 @@ ansible 2.4.3.0
 ## Hosts
 Typically this role is included in a play that only contains the control
 machine. No network connectivity is required for the role to work, although
-copying files from the control machine to other devices will require SCP.
+copying files from the control machine to other devices will require SCP or
+some other mechanism of file transfer.
+
+## LaTeX installation
+Users who want to take advantage of this role's ability to create PDFs
+along with text files will need to install TeX Live. After installation,
+follow the steps to update your `PATH` variable so that the shell command
+`pdflatex` functions.
+
+> Download TeX Live:
+> https://www.tug.org/texlive/quickinstall.html
+
+Last, update the `texmf.cnf` file contained in the correct location
+(the distribution year changes each year), with `openout_any = a` which
+allows `pdflatex` to create output files in a location outside of the
+directory structure where the source document exists. This is because
+PDFs are written to the proper entity folders as files are shuffled around.
+
+Those not interested in using the documentation feature do not need to
+install LaTeX to use the rest of the role functions. Be sure that `doc_name`
+is always set to `false`, which is a role default, to avoid any LaTeX
+false negatives.
+
+```
+$ cat /usr/local/texlive/2018/texmf.cnf
+% [comments from the Tex Live maintainers]
+openout_any = a
+```
 
 ## Role defaults
 There are several variables defined in the role as defaults. Most of these are
@@ -67,13 +107,6 @@ do not fail catastrophically.
     ...
     ```
 
-  * `DTG`: The date/time group (ISO8601 short) for the templater run. The
-    default value for this variable is "noDTG" which allows the templater
-    engine to execute without using a meaningful DTG. __This default is only
-    defined as a fail-safe in case the `dtg` role, included via the role
-    dependencies, fails to return a value.__ It should never appear in
-    any output files.
-
   * `j2_patterns`: The regular expressions for choosing which files qualify as
     jinja2 templates. Commonly seen as .j2 or .jinja2, the default regexp is
     __"\*.j2,\*.jinja2"__ which covers both options. Its uncommonly changed.
@@ -96,7 +129,8 @@ do not fail catastrophically.
     of __0664__ can be used to enable write permissions to the owner and group
     members. This might be useful when configurations are being created
     based on limited information (read: need to deliver fast) and this
-    tool is being used as a 90% solution.
+    tool is being used as a 90% solution. Note that post-processing changes to
+    output files will invalidate the machine-generated SHA-256 hashes.
 
   * `make_zip`: A true/false question which controls whether to archive all of
     the resulting text files into a single Windows ZIP bundle. When set to yes,
@@ -153,7 +187,7 @@ defining constants at the playbook level. Defining complex data
 structures, like nested dictionaries, lists of dictionaries, etc ...
 can significantly reduce the playbook level variable input process.
 
-## Role tasks (summarized)
+## Role tasks
 The tasks begin by checking that all entities have an `id` field. The output
 is verbose and all entries are checked, even if there are failures early in
 the list. The list indices (counting from 0) indicate where the failures occur,
@@ -173,14 +207,12 @@ directories with templates:
     Given 3 devices in an entity across 2 entities would yield 6 files total.
 
   * `infra_templates/`: Place infrastructure templates here. These templates
-    embed their own iteration, typically iterating over the entity_list,
+    embed their own iteration, typically iterating over the `entity_list`,
     to write information that assists updating the infrastructure to support
     the addition of these new entities. For example, if 4 new carrier POPs are
-    provisioned, an infra_template might populate a CSV to be imported into
+    provisioned, an infra template might populate a CSV to be imported into
     the AAA server to add these new systems, rather than doing it manually.
-    For transient GAIT missions, such as DMC, GSTO, AEHF, and Teleport L2VPN,
-    there are no changes to the underlying GAIT infrastructure. __This folder
-    will not be created when no infrastructure templates are defined for a
+    __This folder is only created when infra templates are defined for a
     playbook that inherits this role. This keeps the delivery bundle clean.__
 
   * `doc_inputs/`: Place any files related to PDF generation here. At a
@@ -222,8 +254,8 @@ in the bundle, but for security reasons, should also be distributed to the
 end-users via some other method.
 
 Archives are written to the archives/ folder and have a format of
-bundle_dtg. For example, a templater that executes at 20171106T122919Z would
-generate an archive __archives/archive\_20171106T122919Z.zip__ file, assuming
+bundle\_dtg. For example, a templater that executes at 20171106T122919Z would
+generate an archive `archives/archive_20171106T122919Z.zip` file, assuming
 a custom `zip_name` was not defined.
 
 ## Role handlers
@@ -236,8 +268,8 @@ The role only comes with one template which is used for writing SHA-256
 checksums to a CSV file. This is common to any templating process and is
 highly generic, and thus need not be implemented in every playbook.
 
-## Usage and design guidance
-Populating the config_templates/ and infra_templates/ directories with the
+## Design guidance
+Populating the `config_templates/` and `infra_templates/` directories with the
 relevant templates for a given objective is the responsibility of the playbook
 designer. Here are some tips:
 
@@ -251,6 +283,5 @@ designer. Here are some tips:
 
   * Infrastructure templates typically have these attributes:
     * Contain single-depth iteration over the `entity_list`
-    * Typically dont need newline sequence adjustments
     * May deal with complex CSV files or other formats as required
     * Are optional. When not supplied, the role gracefully skips the process
