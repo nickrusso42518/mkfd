@@ -13,7 +13,7 @@ organizations that are not willing to automate their production devices yet.
 ## Supported platforms
 Control machine information:
 ```
-$ cat /etc/redhat-release 
+$ cat /etc/redhat-release
 Red Hat Enterprise Linux Server release 7.4 (Maipo)
 
 $ uname -a
