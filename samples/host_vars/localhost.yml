@@ -1,4 +1,6 @@
 ---
+doc_name: "SITE"
+make_zip: true
 corp_server:
   tacacs: "203.0.113.11"
   snmp: "203.0.113.12"
@@ -6,13 +8,18 @@ corp_server:
   ntp:
     - "203.0.113.14"
     - "203.0.113.15"
+common:
+  rtr_ver: "IOS-XE 3.16.05s"
+  sw_ver: "IOS 15.2(4)"
 entity_list:
   - id: "BRANCH1"
+    uplink: "GigabitEthernet0/0"
     pece_net: "198.51.100.0/31"
     site_net: "192.0.2.0/25"
-    num_swports: 24
+    num_swports: 48
   - id: "BRANCH2"
+    uplink: "GigabitEthernet2/1"
     pece_net: "198.51.100.2/31"
     site_net: "192.0.2.128/25"
-    num_swports: 48
+    num_swports: 24
 ...

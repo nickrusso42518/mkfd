@@ -1,0 +1,150 @@
+% *** by: Vv current_user vV at DTG: Vv DTG vV ***
+%
+\documentclass{article}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{geometry}
+\geometry{letterpaper, landscape, right=1.2in, left=1.2in, top=0.8in, bottom=0.8in}
+\usepackage{underscore}
+\usepackage{indentfirst}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+% Build headers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{About Me: http://njrusmc.net}
+\cfoot{Site: Vv entity.id vV}
+\rfoot{\thepage}
+
+\graphicspath{{"Vv PBDT vV"}}
+
+% Preamble
+\author{Prepared by: Vv current_user vV}
+\title{Site Documentation for Vv entity.id vV}
+\date{DTG Vv DTG vV}
+
+% Content
+\begin{document}
+
+\begin{figure}[h]
+\includegraphics[width=.6\textwidth]{{logo.jpg}}
+\centering
+\end{figure}
+
+{\let\newpage\relax\maketitle}
+\thispagestyle{empty}
+
+\newpage
+\begin{abstract}
+This document provides the comprehensive installation instructions and
+reference diagram for Vv entity.id vV. Everyone from the physical
+installers, to the Network Operations Center (NOC), to the design
+architects can reference this documentation. The contents below
+allow for easy navigation and automatic extensively as the document
+grows longer over time.
+
+Exact configurations for devices are included as separate, per-device
+configuration files. Installers and network engineers are encouraged
+to copy/paste this text into their devices rather than hand-type every
+command. This speeds up deployment and reduces implementation errors.
+\end{abstract}
+
+\tableofcontents
+\listoffigures
+% \listoftables
+
+\newpage
+\section{Site Installation}
+\subsection{Instructions}
+\begin{enumerate}
+  \setlength\itemsep{0.00em}
+  \item Securely install the router and switch in the telecommunications area.
+  \item Power on both devices. While they are powering up, connect the console
+    cable to the router
+  \item Issue the command \verb|show version| and ensure
+    \verb|Vv common.rtr_ver vV| is loaded. Upgrade if necessary.
+  \item Move the console cable to the switch, use \verb|show version| and
+    ensure \verb|Vv common.sw_ver vV| is loaded. Upgrade if necessary.
+  \item Connect the Ethernet last-mile fiber into port \verb|Vv entity.uplink vV|
+    per the reference diagram.
+  \item Issue the command \verb|show interfaces Vv entity.uplink vV transceiver detail|.
+  \item Annotate the optical TX/RX power readings in the diagram.
+  \item Issue the command \verb|show interface Vv entity.uplink vV| to ensure
+    it is in the up/up state. Ensure there are no errors.
+  \item Issue the commands \verb|show bgp ipv4 unicast Vv data_net vV| and
+    \verb|show bgp ipv4 unicast Vv voice_net vV|, ensuring the routes are in BGP.
+  \item Issue the command \verb|ping Vv pe_ip vV| to ping the MPLS L3VPN PE.
+  \item Issue the command \verb|show bgp ipv4 unicast neighbor Vv pe_ip vV|
+    to ensure the BGP session to the PE came up.
+  \item Issue the command \verb|ping Vv corp_server.tacacs vV| to test
+    connectivity back to the corporate data center TACACS server.
+\end{enumerate}
+\subsection{Reference Diagram}
+\begin{figure}[!h]
+\centering
+\begin{tikzpicture}
+    \draw (0, 0) node[inner sep=0]{\includegraphics[width=1.0\textwidth]{branch.jpg} };
+    \draw (-8.5, -2.5) node[inner sep=0]{SW IP: Vv sw_ip vV};
+    \draw (7.7, -2.5) node[inner sep=0]{\textbf{Data Center}};
+    \draw (0.2, 0.2) node[inner sep=0]{PE: Vv pe_ip vV};
+    \draw (-4.5, 0.2) node[inner sep=0]{CE: Vv ce_ip vV};
+    \draw (-3.0, -0.4) node[inner sep=0]{\color{ForestGreen}BGP peering};
+    \draw (-4.0, -1.4) node[inner sep=0]{Vv entity.uplink vV};
+    \draw (7.8, 1.4) node[inner sep=0]{
+        \begin{tabular}{|l|l|}
+        \hline
+        \multicolumn{2}{|l|}{Corporate servers}    \\
+        \hline
+        \hline
+        TACACS    & Vv corp_server.tacacs vV       \\
+        \hline
+        SNMP      & Vv corp_server.snmp vV         \\
+        \hline
+        Syslog    & Vv corp_server.syslog vV       \\
+        Bb for n in corp_server.ntp bB
+        \hline
+        NTP Vv loop.index vV    & Vv n vV          \\
+        Bb endfor bB
+        \hline
+    \end{tabular} };
+    \draw (-4.0, -2.35) node[inner sep=0]{
+        \begin{tabular}{|l|l|}
+        \hline
+        \multicolumn{2}{|l|}{Optical power dbm}                \\
+        \hline
+        \hline
+        TX Power & \TextField[name=tx,width=1.2cm,value=dbm]{} \\
+        \hline
+        RX Power & \TextField[name=rx,width=1.2cm,value=dbm]{} \\
+        \hline
+    \end{tabular} };
+    \draw (-6.8, 1.7) node[inner sep=0]{
+        \begin{tabular}{|l|l|l|}
+        \hline
+        \multicolumn{3}{|l|}{Local subnet and VLAN table} \\
+        \hline
+        VLAN ID  & Subnet/mask        & Gateway IP        \\
+        \hline
+        \hline
+        VLAN 10  & Vv data_net vV/26  & Vv data_gway vV   \\
+        \hline
+        VLAN 20  & Vv voice_net vV/26 & Vv voice_gway vV  \\
+        \hline
+    \end{tabular} };
+\end{tikzpicture}
+\caption{Branch Diagram}
+\label{fig:branch}
+\end{figure}
+\end{document}
+%
+% EOF
