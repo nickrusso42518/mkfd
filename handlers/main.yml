@@ -22,13 +22,14 @@
     path: "{{ PBFI }}"
     state: absent
 
-# This role does not assume the user wants to copy the ZIP file from the
-# control machine. Assuming this is desired, this task provides a copy/paste
-# command for users to SCP the file to a WANMGR.
-- name: "SYS >> Securely copy the archive ZIP to a WANMGR"
+# Users can optionally copy the ZIP bundle to a SCP server by copying
+# the SCP command written to stdout for simplicity.
+- name: "SYS >> Copy the command below to SCP the archive off-box"
   listen: "archive_handler"
   debug:
-    msg: "scp {{ PBA }}{{ zip_name }}_{{ DTG }}.zip scp@WANMGR_0365:/facts/"
+    msg: >-
+      scp {{ PBA }}{{ zip_name }}_{{ DTG }}.zip
+      {{ scp.user }}@{{ scp.host }}:/mkfd/
 
 # The final cleanup task is only relevant for developer testing, such
 # as CI pipeline or manual regression testing. After the archive is build
