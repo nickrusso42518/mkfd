@@ -10,4 +10,7 @@ remove_zip: false
 doc_name: false
 keep_tex: false
 skip_sha256: false
+scp:
+  user: "nick"
+  host: "192.0.2.1"
 ...

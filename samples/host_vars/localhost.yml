@@ -11,9 +11,6 @@ corp_server:
 common:
   rtr_ver: "IOS-XE 3.16.05s"
   sw_ver: "IOS 15.2(4)"
-scp:
-  user: "nick"
-  host: "192.0.2.1"
 entity_list:
   - id: "BRANCH1"
     uplink: "GigabitEthernet0/0"

@@ -5,9 +5,6 @@ all:
       hosts:
         localhost:
       vars:
-        scp:
-          user: "nick"
-          host: "192.0.2.1"
         entity_list:
           - id: "test1"
             ipaddr: "192.0.1.1"
