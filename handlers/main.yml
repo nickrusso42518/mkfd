@@ -30,18 +30,4 @@
     msg: >-
       scp {{ PBA }}{{ zip_name }}_{{ DTG }}.zip
       {{ scp.user }}@{{ scp.host }}:/mkfd/
-
-# The final cleanup task is only relevant for developer testing, such
-# as CI pipeline or manual regression testing. After the archive is build
-# and all supporting files/directories are deleted, only the archive file
-# remains. This task deletes the archive file as well, effectively making
-# the entire templating process produce nothing. It can be used to ensure
-# a specific playbook runs without exploding (a smoke test). The boolean
-# 'remove_zip' is false in the role defaults.
-- name: "TEST >> Remove the archive, since this is a test run"
-  listen: "archive_handler"
-  file:
-    path: "{{ PBA }}{{ zip_name }}_{{ DTG }}.zip"
-    state: absent
-  when: "remove_zip"
 ...

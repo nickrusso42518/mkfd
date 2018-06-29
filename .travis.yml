@@ -1,0 +1,18 @@
+---
+# Install python packages for ansible and linters.
+install:
+  - "sudo pip install -r requirements.txt"
+
+# Execute linting tests before running the main playbook.
+# If any of these tasks fail, the entire build fails immediately.
+# Also must specify the location of the ansible.cfg file as it is
+# not in the role's top directory for cleanliness.
+before_script:
+  - "./tests/lint.sh"
+  - "export ANSIBLE_CONFIG=tests/ansible.cfg"
+
+# Run the role playbook with mock inputs to validate the role functionality.
+# Mock inputs are stored as 'control' group variables in the inventory.yml file.
+script:
+  - "ansible-playbook tests/test_playbook.yml -i tests/inventory.yml"
+...

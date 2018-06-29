@@ -145,13 +145,6 @@ do not fail catastrophically.
     descriptive name for the ZIP file output generated when `make_zip` is
     true. By default, the string "archive" is used.
 
-  * `remove_zip`: A seemingly useless option, this true/false question
-    applies when `make_zip` is true and determines whether or not the ZIP
-    archive should be deleted at the end of the role execution. This option
-    is generally only set to `true` in two cases:
-      * When benchmarking performance and not needing an end product
-      * When running regression testing, either CI-based or manual
-
   * `doc_name`: When specified, the role looks for a jinja2 file with this
     basename with the intent of creating a PDF document using LaTeX. The
     file must be present in a playbook directory called `doc_inputs/`. The
