@@ -67,7 +67,8 @@ PDFs are written to the proper entity folders as files are shuffled around.
 Those not interested in using the documentation feature do not need to
 install LaTeX to use the rest of the role functions. Be sure that `doc_name`
 is always set to `false`, which is a role default, to avoid any LaTeX
-false negatives.
+false negatives. Users can also `export openout_any=a` as an environment
+variable, which works nicely for CI/CD pipelines.
 
 ```
 $ cat /usr/local/texlive/2018/texmf.cnf
