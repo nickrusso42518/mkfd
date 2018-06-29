@@ -1,7 +1,9 @@
 ---
 # Install python packages for ansible and linters.
+# Install a minimal TexLive installation for LaTeX support.
 install:
   - "sudo pip install -r requirements.txt"
+  - "sudo apt-get install texlive-base -y"
 
 # Execute linting tests before running the main playbook.
 # If any of these tasks fail, the entire build fails immediately.
