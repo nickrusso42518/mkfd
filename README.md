@@ -2,6 +2,10 @@
 https://travis-ci.org/nickrusso42518/mkfd.svg?branch=master)](
 https://travis-ci.org/nickrusso42518/mkfd)
 
+[![published](
+http://cs.co/codeex-badge)](
+https://developer.cisco.com/codeexchange/github/repo/nickrusso42518/mkfd)
+
 # role : Make Files and Docs (mkfd)
 This role defines a general-purpose text templating engine. Plays that include
 this role will supply their own variables and templates in the proper
