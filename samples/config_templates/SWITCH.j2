@@ -40,7 +40,7 @@ interface Vlan1
 !
 interface Vlan10
  description DATA SVI FOR MGMT
- ip address {{ sw_ip }}
+ ip address {{ sw_ip }} 255.255.255.192
  no shutdown
 !
 ip default-gateway {{ data_gway }}
