@@ -14,8 +14,8 @@ associated with correctly templating text files. The tool can also
 handle infrastructure updates, configuration integrity via hashing, and
 automated documentation generation using LaTeX.
 
-> Contact information:
-> Email:    njrusmc@gmail.com
+> Contact information: \
+> Email:    njrusmc@gmail.com \
 > Twitter:  @nickrusso42518
 
   * [Supported platforms](#supported-platforms)
@@ -42,15 +42,14 @@ Linux ip-10-125-0-100.ec2.internal 3.10.0-693.el7.x86_64 #1 SMP
   Thu Jul 6 19:56:57 EDT 2017 x86_64 x86_64 x86_64 GNU/Linux
 
 $ ansible --version
-ansible 2.6.2
-  config file = /home/ec2-user/natm/ansible.cfg
-  configured module search path = [u'/home/ec2-user/.ansible/plugins/modules',
-    u'/usr/share/ansible/plugins/modules']
-  ansible python module location = /usr/lib/python2.7/site-packages/ansible
-  executable location = /usr/bin/ansible
-  python version = 2.7.5 (default, May  3 2017, 07:55:04)
-    [GCC 4.8.5 20150623 (Red Hat 4.8.5-14)]
-```
+ansible 2.7.7
+  config file = /etc/ansible/ansible.cfg
+  configured module search path = ['/usr/share/my_modules']
+  ansible python module location =
+    /home/ec2-user/environments/ps-ans/lib64/python3.6/site-packages/ansible
+  executable location = /home/ec2-user/environments/ps-ans/bin/ansible
+  python version = 3.6.7 (default, Dec  5 2018, 15:02:05)
+    [GCC 4.8.5 20150623 (Red Hat 4.8.5-36)]
 
 ## Hosts
 Typically this role is included in a play that only contains the control
