@@ -5,8 +5,9 @@ python:
   - "3.6"
 
 env:
-  - "ANSIBLE_CONFIG=tests/ansible.cfg"
-  - "openout_any=a"
+  global:
+    - "ANSIBLE_CONFIG=tests/ansible.cfg"
+    - "openout_any=a"
 
 # Install python packages for ansible and linters.
 # Install a minimal TexLive installation for LaTeX support.
