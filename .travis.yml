@@ -21,5 +21,7 @@ before_script:
 # Run the role playbook with mock inputs to validate the role functionality.
 # Mock inputs are stored as 'control' group variables in the inv.yml file.
 script:
+  - "export ANSIBLE_CONFIG=tests/ansible.cfg"
+  - "export openout_any=a"
   - "make test"
 ...
