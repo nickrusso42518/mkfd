@@ -2,12 +2,12 @@
 language: python
 python:
   - "2.7"
+  - "3.6"
 
 # Install python packages for ansible and linters.
 # Install a minimal TexLive installation for LaTeX support.
 install:
-  - "pip install -r requirements.txt"
-  - "sudo apt-get install texlive-latex-recommended -y"
+  - "make setup"
 
 # Execute linting tests before running the main playbook.
 # If any of these tasks fail, the entire build fails immediately.
@@ -16,12 +16,10 @@ install:
 # ensure pdflatex will write output files where needed, basically
 # disabling the paranoid behavior about output files.
 before_script:
-  - "./tests/lint.sh"
-  - "export ANSIBLE_CONFIG=tests/ansible.cfg"
-  - "export openout_any=a"
+  - "make lint"
 
 # Run the role playbook with mock inputs to validate the role functionality.
-# Mock inputs are stored as 'control' group variables in the inventory.yml file.
+# Mock inputs are stored as 'control' group variables in the inv.yml file.
 script:
-  - "ansible-playbook tests/test_playbook.yml -i tests/inventory.yml"
+  - "make test"
 ...

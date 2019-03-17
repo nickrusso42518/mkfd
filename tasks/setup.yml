@@ -16,13 +16,13 @@
 - name: "SYS >> Ensure all entities have a valid 'id' field"
   assert:
     that:
-      - "item.1.id is defined"  # The 'id' key must exist
-      - "item.1.id"  # Value cannot be null or empty string
-      - "item.1.id | lower != 'undefined'"  # Value cannot be 'undefined'
-    msg: "Entity at index {{ item.0 }} has invalid 'id' field"
-  with_indexed_items: "{{ entity_list }}"
+      - "item.id is defined"  # The 'id' key must exist
+      - "item.id"  # Value cannot be null or empty string
+      - "item.id | lower != 'undefined'"  # Value cannot be 'undefined'
+    msg: "Entity {{ item }} has invalid 'id' field"
+  loop: "{{ entity_list }}"
   loop_control:
-    label: "entity {{ item.0 + 1 }}/{{ entity_list | length }}"
+    label: "id: {{ item.id | default('none') }}"
 
 # There cannot be duplicates because then files and directories
 # would overwrite one another, causing confusion.
@@ -30,10 +30,11 @@
 # the same list after removing any duplicate items
 - name: "SYS >> Ensure there are no duplicate entity ids"
   assert:
-    that: >-
-        entity_list | length ==
-        entity_list | map(attribute='id') | list | unique | length
+    that: "list_len == set_len"
     msg: "Duplicate 'id' keys exist within entity_list"
+  vars:
+    list_len: "{{ entity_list | length }}"
+    set_len: "{{ entity_list | map(attribute='id') | list | unique | length }}"
 
 # Try to find the playbook file 'pre_check.yml' at the top level
 # of the playbook hierarchy. This file contains additional, per-entity
@@ -62,7 +63,6 @@
     PBF: "{{ playbook_dir }}/files/"  # playbook files (outputs)
     PBFI: "{{ playbook_dir }}/files/infra_{{ DTG }}/"  # per-entity infra files
     PBA: "{{ playbook_dir }}/archives/"  # playbook archives (outputs)
-    PBHV: "{{ playbook_dir }}/host_vars/"  # playbook host variables files
 
 # Most of the directories above always exist. This task ensures
 # the necessary ones exist before continuing.
@@ -70,7 +70,7 @@
   file:
     path: "{{ item }}"
     state: directory
-  with_items:
+  loop:
     - "{{ PBCT }}"
     - "{{ PBIT }}"
     - "{{ PBDT }}"

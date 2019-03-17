@@ -33,7 +33,7 @@
       pece_net {{ entity.pece_net | default ('nothing') }}
       site_net {{ entity.site_net | default ('nothing') }}
       num_swports {{ entity.num_swports | default ('nothing') }}
-  with_items: "{{ entity_list }}"
+  loop: "{{ entity_list }}"
   loop_control:
     loop_var: entity
     label: "id:{{ entity.id }}"

@@ -117,9 +117,10 @@ do not fail catastrophically.
     ...
     ```
 
-  * `j2_patterns`: The regular expressions for choosing which files qualify as
-    jinja2 templates. Commonly seen as .j2 or .jinja2, the default regexp is
-    __"\*.j2,\*.jinja2"__ which covers both options. Its uncommonly changed.
+  * `zip_format`: Both the compression type and file extension of the archive.
+    The role default is `zip` for Windows compatibility. Any option supported
+    by the `archive` module is supported here, based on current Ansible
+    version. Use `ansible-doc archive` to see the list of options.
 
   * `debug_level`: The debug verbosity required in order to see role-level
     task debugging during execution. Set to __1 by default__ and not commonly

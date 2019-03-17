@@ -6,7 +6,7 @@
 - name: "SYS >> Build list of config output directories"
   set_fact:
     CONFIG_DIRS: "{{ CONFIG_DIRS + ['{0}{1}_{2}'.format(PBF, item.id, DTG)] }}"
-  with_items: "{{ entity_list }}"
+  loop: "{{ entity_list }}"
   loop_control:
     label: "{{ item.id }}"
 
@@ -23,7 +23,7 @@
   file:
     path: "{{ item }}"
     state: directory
-  with_items: "{{ CONFIG_DIRS }}"
+  loop: "{{ CONFIG_DIRS }}"
 
 # Search the PBCT path "/etc/ansible/(playbook)/config_templates/"
 # for specific Jinja2 files, typically ending in .j2 or .jinja2 as
@@ -32,7 +32,7 @@
 - name: "SYS >> Get playbook config templates"
   find:
     path: "{{ PBCT }}"
-    patterns: "{{ j2_patterns }}"
+    patterns: "*.j2,*.jinja2"
   register: PBCT_LIST
 
 # Toggle debugging to print the list created above. This can be invoked
@@ -47,9 +47,7 @@
 #   - The list of entities whereby each component dict is seen as item.0
 #   - The list of config directories; each component string is seen as item.1
 - include_tasks: "make_config.yml"
-  with_together:
-    - "{{ entity_list }}"
-    - "{{ CONFIG_DIRS }}"
+  loop: "{{ entity_list | zip(CONFIG_DIRS) | list }}"
   loop_control:
     label: "id:{{ item.0.id }} config_dir:{{ item.1 }}"
 ...

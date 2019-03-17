@@ -6,7 +6,7 @@
   stat:
     path: "{{ item }}"
   register: PB_DIRS_STATE
-  with_items: "{{ PB_DIRS }}"
+  loop: "{{ PB_DIRS }}"
 
 # The list being iterated over should contain a dict, one
 # per playbook directory discovered in the previous step. All
@@ -14,7 +14,7 @@
 - name: "SYS >> Ensure directories were created"
   assert:
     that: "item.stat.exists"
-  with_items: "{{ PB_DIRS_STATE.results }}"
+  loop: "{{ PB_DIRS_STATE.results }}"
 
 # Search for any text files containing the current DTG within the
 # files/ directory. The role needs to know definitively whether files

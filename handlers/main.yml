@@ -9,7 +9,7 @@
   file:
     path: "{{ PBF }}{{ item.id }}_{{ DTG }}"
     state: absent
-  with_items: "{{ entity_list }}"
+  loop: "{{ entity_list }}"
   loop_control:
     label: "{{ PBF }}{{ item.id }}_{{ DTG }}"
 

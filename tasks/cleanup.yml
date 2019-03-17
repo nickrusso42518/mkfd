@@ -36,7 +36,7 @@
       when: "not item.skipped is defined or not item.skipped"
       vars:
         PATH: "{{ item.dest | default(item.path) }}"
-      with_items: "{{ PBF_LIST }}"
+      loop: "{{ PBF_LIST }}"
       loop_control:
         label: "path:{{ PATH }}"
 
@@ -74,8 +74,8 @@
 - name: "SYS >> Archive all output files containing DTG '{{ DTG }}'"
   archive:
     path: "{{ PBF }}*{{ DTG }}*"
-    dest: "{{ PBA }}{{ zip_name }}_{{ DTG }}.zip"
-    format: zip
+    dest: "{{ PBA }}{{ zip_name }}_{{ DTG }}.{{ zip_format }}"
+    format: "{{ zip_format }}"
     mode: "{{ file_mode }}"
     remove: true
   when: "make_zip"

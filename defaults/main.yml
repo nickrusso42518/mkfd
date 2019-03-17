@@ -1,12 +1,12 @@
 ---
 entity_list: []
-j2_patterns: "*.j2,*.jinja2"
 debug_level: 1
 file_mode: 0444
 current_user: "ansible"
 zip_name: "archive"
 make_zip: false
 remove_zip: false
+zip_format: "zip"
 doc_name: false
 keep_tex: false
 skip_sha256: false

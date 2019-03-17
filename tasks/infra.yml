@@ -6,7 +6,7 @@
 - name: "SYS >> Get playbook infra templates"
   find:
     path: "{{ PBIT }}"
-    patterns: "{{ j2_patterns }}"
+    patterns: "*.j2,*.jinja2"
   register: PBIT_LIST
 
 # Toggle debugging to print the result list created above. This can be invoked
@@ -31,11 +31,12 @@
 - name: "SYS >> Make infra from playbook templates"
   template:
     src: "{{ item.path }}"
-    dest: >-
-      {{ PBFI }}{{ (item.path | basename | splitext)[0] }}_{{ DTG }}.txt
+    dest: "{{ PBFI }}{{ fname }}_{{ DTG }}.txt"
     mode: "{{ file_mode }}"
   register: PBF_LIST_INFRA
-  with_items: "{{ PBIT_LIST.files }}"
+  vars:
+    fname: "{{ (item.path | basename | splitext)[0] }}"
+  loop: "{{ PBIT_LIST.files }}"
   loop_control:
     label: "template:{{ item.path }}"
 

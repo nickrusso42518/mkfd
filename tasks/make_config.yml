@@ -7,7 +7,7 @@
 # that we are in right now is already being invoked iteratively, another
 # level of iteration is required to process each playbook-specific
 # template. The loop variable is renamed to "templat" since "item" is already
-# in use by the parent loop, shown below again:
+# in use by the parent loop, shown below again (legacy syntax for clarity):
 #   with_together:
 #     - "{{ entity_list }}"  -->  referenced as item.0
 #     - "{{ CONFIG_DIRS }}"  -->  referenced as item.1
@@ -21,12 +21,12 @@
 - name: "SYS >> Make config from playbook templates"
   template:
     src: "{{ templat.path }}"
-    dest: >-
-      {{ item.1 }}/{{ item.0.id }}_{{
-      (templat.path | basename | splitext)[0] }}_{{ DTG }}.txt
+    dest: "{{ item.1 }}/{{ item.0.id }}_{{ fname }}.txt"
     mode: "{{ file_mode }}"
   register: PBF_LIST_CONFIG
-  with_items: "{{ PBCT_LIST.files }}"
+  vars:
+    fname: "{{ (templat.path | basename | splitext)[0] }}_{{ DTG }}"
+  loop: "{{ PBCT_LIST.files }}"
   loop_control:
     loop_var: "templat"
     label: "template:{{ templat.path }}"

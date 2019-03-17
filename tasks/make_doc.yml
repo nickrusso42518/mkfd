@@ -64,7 +64,7 @@
     pdflatex -jobname {{ PDF_DOC }}
     -output-format pdf -halt-on-error --interaction=batchmode
     -output-directory={{ item.1 }} {{ PBF_TEX.dest }}
-  with_items:
+  loop:
     - 1
     - 2
     - 3
@@ -88,7 +88,7 @@
   file:
     path: "{{ PDF_DOC }}.{{ ext }}"
     state: absent
-  with_items:
+  loop:
     - "aux"
     - "lof"
     - "log"

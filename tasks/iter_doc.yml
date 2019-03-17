@@ -9,9 +9,7 @@
 #   - The list of config directories; each component string is seen as item.1
 - name: "SYS >> Convert j2 to LaTeX to PDF for '{{ doc_name }}'"
   include_tasks: "make_doc.yml"
-  with_together:
-    - "{{ entity_list }}"
-    - "{{ CONFIG_DIRS }}"
+  loop: "{{ entity_list | zip(CONFIG_DIRS) | list }}"
   loop_control:
     label: "id:{{ item.0.id }}  dir:{{ item.1 }}"
 ...

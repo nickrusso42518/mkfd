@@ -9,7 +9,7 @@
       - "item.ipaddr | ipv4 == item.ipaddr"
       - "item.ipaddr | ipaddr('prefix') == 32"
       - "item.prefixlen | int == item.prefixlen"
-  with_items: "{{ entity_list }}"
+  loop: "{{ entity_list }}"
   loop_control:
     label: "checking:{{ item.id }}"
 
