@@ -27,6 +27,7 @@ test:
 .PHONY: setup
 setup:
 	@echo "Starting  setup"
-	pip install -r requirements.txt
+	sudo apt-get update
 	sudo apt-get install texlive-latex-recommended -y
+	pip install -r requirements.txt
 	@echo "Completed setup"
