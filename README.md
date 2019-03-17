@@ -50,6 +50,7 @@ ansible 2.7.7
   executable location = /home/ec2-user/environments/ps-ans/bin/ansible
   python version = 3.6.7 (default, Dec  5 2018, 15:02:05)
     [GCC 4.8.5 20150623 (Red Hat 4.8.5-36)]
+```
 
 ## Hosts
 Typically this role is included in a play that only contains the control
