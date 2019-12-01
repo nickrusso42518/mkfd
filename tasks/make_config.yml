@@ -23,7 +23,7 @@
     src: "{{ templat.path }}"
     dest: "{{ item.1 }}/{{ item.0.id }}_{{ fname }}.txt"
     mode: "{{ file_mode }}"
-  register: PBF_LIST_CONFIG
+  register: "PBF_LIST_CONFIG"
   vars:
     fname: "{{ (templat.path | basename | splitext)[0] }}_{{ DTG }}"
   loop: "{{ PBCT_LIST.files }}"

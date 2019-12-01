@@ -8,7 +8,7 @@
   listen: "archive_handler"
   file:
     path: "{{ PBF }}{{ item.id }}_{{ DTG }}"
-    state: absent
+    state: "absent"
   loop: "{{ entity_list }}"
   loop_control:
     label: "{{ PBF }}{{ item.id }}_{{ DTG }}"
@@ -20,7 +20,7 @@
   listen: "archive_handler"
   file:
     path: "{{ PBFI }}"
-    state: absent
+    state: "absent"
 
 # Users can optionally copy the ZIP bundle to a SCP server by copying
 # the SCP command written to stdout for simplicity.

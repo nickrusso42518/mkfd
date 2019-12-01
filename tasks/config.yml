@@ -14,7 +14,7 @@
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print CONFIG_DIRS output"
   debug:
-    var: CONFIG_DIRS
+    var: "CONFIG_DIRS"
     verbosity: "{{ debug_level }}"
 
 # Iterate over the list of CONFIG_DIRS and create each one, since
@@ -22,7 +22,7 @@
 - name: "SYS >> Ensure config output directories exist"
   file:
     path: "{{ item }}"
-    state: directory
+    state: "directory"
   loop: "{{ CONFIG_DIRS }}"
 
 # Search the PBCT path "/etc/ansible/(playbook)/config_templates/"
@@ -33,13 +33,13 @@
   find:
     path: "{{ PBCT }}"
     patterns: "*.j2,*.jinja2"
-  register: PBCT_LIST
+  register: "PBCT_LIST"
 
 # Toggle debugging to print the list created above. This can be invoked
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print PBCT_LIST output"
   debug:
-    var: PBCT_LIST
+    var: "PBCT_LIST"
     verbosity: "{{ debug_level }}"
 
 # Iteratively invoke "make_config.yml" which is similar to a function

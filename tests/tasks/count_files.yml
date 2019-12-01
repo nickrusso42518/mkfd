@@ -5,7 +5,7 @@
 - name: "SYS >> Query if directories were created"
   stat:
     path: "{{ item }}"
-  register: PB_DIRS_STATE
+  register: "PB_DIRS_STATE"
   loop: "{{ PB_DIRS }}"
 
 # The list being iterated over should contain a dict, one
@@ -24,7 +24,7 @@
     path: "{{ playbook_dir }}/files"
     recurse: true
     patterns: "*{{ DTG }}.txt"
-  register: GENERATED_FILES
+  register: "GENERATED_FILES"
 
 # Depending on the situation, the number of expected files may vary.
 # Ensure that the actual number of files on disk matches what was
@@ -43,7 +43,7 @@
   find:
     path: "{{ playbook_dir }}/archives"
     patterns: "*{{ DTG }}.zip"
-  register: GENERATED_ARCH
+  register: "GENERATED_ARCH"
 
 # Depending on the situation, the number of expected archives may vary.
 # Ensure that the actual number of archives on disk matches what was
@@ -62,7 +62,7 @@
   find:
     path: "{{ playbook_dir }}/files"
     patterns: "*{{ DTG }}.csv"
-  register: GENERATED_CSV
+  register: "GENERATED_CSV"
 
 # Depending on the situation, the number of expected CSVs may vary.
 # Ensure that the actual number of CSVs on disk matches what was
@@ -109,7 +109,7 @@
     path: "{{ playbook_dir }}/files"
     patterns: "*{{ DTG }}.pdf"
     recurse: true
-  register: GENERATED_PDF
+  register: "GENERATED_PDF"
 
 # Depending on the situation, the number of expected PDFs may vary.
 # Ensure that the actual number of PDFs on disk matches what was

@@ -42,13 +42,14 @@ Linux ip-10-125-0-100.ec2.internal 3.10.0-693.el7.x86_64 #1 SMP
   Thu Jul 6 19:56:57 EDT 2017 x86_64 x86_64 x86_64 GNU/Linux
 
 $ ansible --version
-ansible 2.7.7
-  config file = /etc/ansible/ansible.cfg
-  configured module search path = ['/usr/share/my_modules']
+ansible 2.8.7
+  config file = /home/ec2-user/racc/ansible.cfg
+  configured module search path = ['/home/ec2-user/.ansible/plugins/modules',
+    '/usr/share/ansible/plugins/modules']
   ansible python module location =
-    /home/ec2-user/environments/ps-ans/lib64/python3.6/site-packages/ansible
-  executable location = /home/ec2-user/environments/ps-ans/bin/ansible
-  python version = 3.6.7 (default, Dec  5 2018, 15:02:05)
+    /home/ec2-user/environments/racc287/lib/python3.7/site-packages/ansible
+  executable location = /home/ec2-user/environments/racc287/bin/ansible
+  python version = 3.7.3 (default, Aug 27 2019, 16:56:53)
     [GCC 4.8.5 20150623 (Red Hat 4.8.5-36)]
 ```
 

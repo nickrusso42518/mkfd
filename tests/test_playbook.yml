@@ -1,6 +1,6 @@
 ---
 - name: "SYS >> Execute test playbook"
-  hosts: control
+  hosts: "control"
   vars:
     # Boolean flag to ensure the 'pre_check.yml' file is included.
     PRE_CHECK: false
@@ -25,7 +25,7 @@
 
         # Include the role for the first time
         - include_role:
-            name: mkfd
+            name: "mkfd"
 
         # Assert that the right number of files exists after this
         # test case. Because no inputs were provided, there should be not
@@ -68,7 +68,7 @@
 
         # Invoke the role.
         - include_role:
-            name: mkfd
+            name: "mkfd"
 
         # Assert that there are 2 output files total, one per entity.
         # There is 1 master checksum file, and nothing else.
@@ -103,7 +103,7 @@
 
         # Invoke the role.
         - include_role:
-            name: mkfd
+            name: "mkfd"
 
         # Just like the previous test, except now there are twice as
         # many config files (2 templates per 2 entities), 1 checksum,
@@ -129,7 +129,7 @@
         # Invoke the role and override the role default 'make_zip' variable
         # to true so that the archive process starts.
         - include_role:
-            name: mkfd
+            name: "mkfd"
           vars:
             make_zip: true
 
@@ -173,7 +173,7 @@
         # specify the basename (minus file extension) of the template
         # created in the previous task.
         - include_role:
-            name: mkfd
+            name: "mkfd"
           vars:
             doc_name: "DOC"
 
@@ -201,7 +201,7 @@
         # Invoke the role and override both the 'doc_name' and 'make_zip'
         # role defaults to enable documentation and archival.
         - include_role:
-            name: mkfd
+            name: "mkfd"
           vars:
             doc_name: "DOC"
             make_zip: true
@@ -228,7 +228,7 @@
 
         # Invoke the role with 'skip_sha256' role default overriden to true.
         - include_role:
-            name: mkfd
+            name: "mkfd"
           vars:
             skip_sha256: true
 

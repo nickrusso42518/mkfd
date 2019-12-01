@@ -7,13 +7,13 @@
   find:
     path: "{{ PBIT }}"
     patterns: "*.j2,*.jinja2"
-  register: PBIT_LIST
+  register: "PBIT_LIST"
 
 # Toggle debugging to print the result list created above. This can be invoked
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print PBIT_LIST output"
   debug:
-    var: PBIT_LIST
+    var: "PBIT_LIST"
     verbosity: "{{ debug_level }}"
 
 # Dynamically create a directory for infrastructure updates only if at
@@ -22,7 +22,7 @@
 - name: "SYS >> Ensure infrastructure directory exists"
   file:
     path: "{{ PBFI }}"
-    state: directory
+    state: "directory"
   when: "PBIT_LIST.files | length > 0"
 
 # Iterate over all infrastructure templates discovered in the previous task.
@@ -33,7 +33,7 @@
     src: "{{ item.path }}"
     dest: "{{ PBFI }}{{ fname }}_{{ DTG }}.txt"
     mode: "{{ file_mode }}"
-  register: PBF_LIST_INFRA
+  register: "PBF_LIST_INFRA"
   vars:
     fname: "{{ (item.path | basename | splitext)[0] }}"
   loop: "{{ PBIT_LIST.files }}"
@@ -44,6 +44,6 @@
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print PBF_LIST_INFRA output"
   debug:
-    var: PBF_LIST_INFRA
+    var: "PBF_LIST_INFRA"
     verbosity: "{{ debug_level }}"
 ...

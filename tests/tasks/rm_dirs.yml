@@ -4,7 +4,7 @@
 # test playbook completes.
 - name: "SYS >> Remove all templater-managed directories"
   file:
-    state: absent
+    state: "absent"
     path: "{{ item }}"
   loop: "{{ PB_DIRS }}"
 ...

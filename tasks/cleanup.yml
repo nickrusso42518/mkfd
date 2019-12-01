@@ -11,7 +11,7 @@
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print PBF_LIST output after combining with infra"
   debug:
-    var: PBF_LIST
+    var: "PBF_LIST"
     verbosity: "{{ debug_level }}"
 
 # Text and PDF outputs from this role are seldom modified. To provide
@@ -30,9 +30,9 @@
         get_attributes: false
         get_md5: false
         get_mime: false
-        checksum_algorithm: sha256
+        checksum_algorithm: "sha256"
         path: "{{ PATH }}"
-      register: PBF_CHECKSUMS
+      register: "PBF_CHECKSUMS"
       when: "not item.skipped is defined or not item.skipped"
       vars:
         PATH: "{{ item.dest | default(item.path) }}"
@@ -44,7 +44,7 @@
     # by using the -v option at the command line when the playbook runs.
     - name: "DEBUG >> Print PBF_CHECKSUMS output"
       debug:
-        var: PBF_CHECKSUMS
+        var: "PBF_CHECKSUMS"
         verbosity: "{{ debug_level }}"
 
     # Using the 'checksum.j2' template included with the role, write the

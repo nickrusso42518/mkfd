@@ -45,7 +45,7 @@
     get_md5: false
     get_mime: false
     path: "{{ playbook_dir }}/pre_check.yml"
-  register: PB_PRE_CHECK
+  register: "PB_PRE_CHECK"
 
 # Only include the file if the task above succeeding in finding it.
 # If the file was not found, then the user did not define it, and so
@@ -69,7 +69,7 @@
 - name: "SYS >> Ensure playbook directories exist"
   file:
     path: "{{ item }}"
-    state: directory
+    state: "directory"
   loop:
     - "{{ PBCT }}"
     - "{{ PBIT }}"

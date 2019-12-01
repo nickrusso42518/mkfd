@@ -9,7 +9,7 @@
     get_md5: false
     get_mime: false
     path: "{{ playbook_dir }}/pre_config.yml"
-  register: PB_PRE_CONFIG
+  register: "PB_PRE_CONFIG"
 
 # If the 'pre_config.yml' file was found in the task above, it is
 # included for processing.

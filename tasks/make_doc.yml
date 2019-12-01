@@ -17,7 +17,7 @@
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print current PDF_DOC"
   debug:
-    var: PDF_DOC
+    var: "PDF_DOC"
     verbosity: "{{ debug_level }}"
 
 # Perform j2 to LaTeX conversion on the doc template. This process is not
@@ -35,7 +35,7 @@
     block_end_string: "bB"
     variable_start_string: "Vv"
     variable_end_string: "vV"
-  register: PBF_TEX
+  register: "PBF_TEX"
 
 # Toggle debugging to print the result from the task above. This can be invoked
 # by using the -v option at the command line when the playbook runs. This
@@ -43,7 +43,7 @@
 # first phase (.j2 to .tex) in the documentation building process.
 - name: "DEBUG >> Print intermediate PBF_TEX"
   debug:
-    var: PBF_TEX
+    var: "PBF_TEX"
     verbosity: "{{ debug_level }}"
 
 # The second phase includes running the .tex file through the "pdflatex" shell
@@ -64,12 +64,9 @@
     pdflatex -jobname {{ PDF_DOC }}
     -output-format pdf -halt-on-error --interaction=batchmode
     -output-directory={{ item.1 }} {{ PBF_TEX.dest }}
-  loop:
-    - 1
-    - 2
-    - 3
+  loop: [1, 2, 3]
   loop_control:
-    loop_var: pass
+    loop_var: "pass"
     label: "pass:{{ pass }}"
 
 # The .tex source file is not something users need to see, and it is typically
@@ -78,7 +75,7 @@
 - name: "SYS >> Remove intermediate .tex file '{{ PBF_TEX.dest | basename }}'"
   file:
     path: "{{ PBF_TEX.dest }}"
-    state: absent
+    state: "absent"
   when: "not keep_tex"
 
 # LaTeX typsetting generates many other intermediate files which are
@@ -87,7 +84,7 @@
 - name: "SYS >> Remove typesetting files from job '{{ PDF_DOC | basename }}'"
   file:
     path: "{{ PDF_DOC }}.{{ ext }}"
-    state: absent
+    state: "absent"
   loop:
     - "aux"
     - "lof"
@@ -96,7 +93,7 @@
     - "toc"
     - "out"
   loop_control:
-    loop_var: ext
+    loop_var: "ext"
     label: "removing:{{ PDF_DOC }}.{{ ext }}"
 
 # Because the .pdf document was generated via the 'command' module
@@ -115,7 +112,7 @@
 # by using the -v option at the command line when the playbook runs.
 - name: "DEBUG >> Print temporary RESULT_DOC"
   debug:
-    var: RESULT_DOC
+    var: "RESULT_DOC"
     verbosity: "{{ debug_level }}"
 
 # Add the .pdf file destination dict (defined above) to the playbook
